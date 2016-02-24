@@ -1,20 +1,16 @@
-import itertools
 import os
 import numpy as np
 import pickle
 import random
 from sklearn.cross_validation import train_test_split
 import collections
-from pegasos import *
 
 
 '''
 Note: No obligation to use this code, though you may if you like.  Skeleton code is just a hint for people who are not familiar with text processing in python.
 It is not necessary to follow.
 '''
-
-
-def folder_list(path,label):
+def folder_list(path,label,n):
     '''
     PARAMETER PATH IS THE PATH OF YOUR LOCAL FOLDER
     '''
@@ -23,8 +19,12 @@ def folder_list(path,label):
     for infile in filelist:
         file = os.path.join(path,infile)
         r = read_data(file)
+        if n > 1:
+            r = n_gramBuilder(r, n)
         r.append(label)
+        # r_ngram.append(label)
         review.append(r)
+        # r_ngram_list.append()
     return review
 
 def read_data(file):
@@ -41,11 +41,10 @@ def read_data(file):
     words = filter(None, words)
     return words
 
-###############################################
-######## YOUR CODE STARTS FROM HERE. ##########
-###############################################
+def n_gramBuilder(r, n):
+    return zip(*[r[i:] for i in range(n)])
 
-def shuffle_data():
+def shuffle_data(n):
     '''
     pos_path is where you save positive review data.
     neg_path is where you save negative review data.
@@ -53,11 +52,15 @@ def shuffle_data():
     pos_path = "/Users/matthewdunn/Dropbox/NYU/Spring2016/MachineLearning/HW/hw3-sentiment/data/pos"
     neg_path = "/Users/matthewdunn/Dropbox/NYU/Spring2016/MachineLearning/HW/hw3-sentiment/data/neg"
 
-    pos_review = folder_list(pos_path,1)
-    neg_review = folder_list(neg_path,-1)
+    pos_review = folder_list(pos_path,1,n)
+    neg_review = folder_list(neg_path,-1,n)
 
     review = pos_review + neg_review
+    # review_n_gram = pos_review_n_gram + neg_review_n_gram
     random.shuffle(review)
+    # random.shuffle(review_n_gram)
+    # n_gram_train = review_n_gram[:1500]
+    # n_gram_test = review_n_gram[1500:]
     train = review[:1500]
     test = review[1500:]
     return train, test
@@ -69,8 +72,8 @@ Save your shuffled result by pickle.
 *Check it out. https://wiki.python.org/moin/UsingPickle
 '''
 
-def countTrainAndTest():
-    train, test = shuffle_data()
+def countTrainAndTest(n):
+    train, test = shuffle_data(n)
     X_train, y_train = counter(train)
     X_test, y_test = counter(test)
     return X_train, y_train, X_test, y_test
@@ -82,30 +85,3 @@ def counter(data):
         y.append(data[i][-1])
         X.append(collections.Counter(data[i][:-1]))
     return X, y
-
-def compareprinter(weightsdictionary):
-    for key in sorted(weightsdictionary)[:5]:
-        print key, weightsdictionary[key]
-
-def main():
-    X_train, y_train, X_test, y_test = countTrainAndTest()
-
-    w = pegasos(X_train, y_train)
-    print '################compareprinter(w)\n'
-    compareprinter(w)
-
-    w2 = pegasosv2(X_train, y_train)
-    print '################compareprinter(w2)\n'
-    compareprinter(w2)
-
-
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-
-
-
