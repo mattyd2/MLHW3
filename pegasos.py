@@ -3,13 +3,12 @@ import collections
 from util import *
 import timeit
 
+# Question 6.2
 def pegasos(X_train, y_train, lambda_reg, max_epochs):
     t = 2
     w = dict()
     epoch = 0
     while epoch < max_epochs:
-        # print "###############epoch # ", epoch
-        # print "###############lambda_reg", lambda_reg
         epoch += 1
         for i in range(len(X_train)):
             t += 1
@@ -26,14 +25,13 @@ def pegasos(X_train, y_train, lambda_reg, max_epochs):
                 increment(w,-stepSize*lambda_reg,w)
     return w
 
+# Question 6.3
 def pegasosv2(X_train, y_train, lambda_reg, max_epochs):
     t = 2
     w = dict()
     s = 1
     epoch = 0
     while epoch < max_epochs:
-        # print "###############epoch # ", epoch
-        # print "###############lambda_reg", lambda_reg
         epoch += 1
         for i in range(len(X_train)):
             t += 1
@@ -43,10 +41,3 @@ def pegasosv2(X_train, y_train, lambda_reg, max_epochs):
                 increment(w,(stepSize*y_train[i])/s,X_train[i])
     increment(w,(s-1),w)
     return w
-
-def signumfunction(w, X, y):
-    count = 0
-    for i in range(len(X)):
-        if y[i]*dotProduct(w, X[i])<0:
-            count += 1
-    return count/(1. * len(X))
