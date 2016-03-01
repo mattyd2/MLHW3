@@ -56,7 +56,7 @@ def shuffle_data(n):
 
     review = pos_review + neg_review
     random.shuffle(review)
-    train = review[:150]
+    train = review[:1500]
     test = review[1500:]
     return train, test
 

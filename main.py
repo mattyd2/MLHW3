@@ -10,7 +10,7 @@ def lambdaListBuider(num_lambdas):
     if num_lambdas == 1:
         return np.array([0.1])
     else:
-        lambda_reg_list = np.logspace(-1, 1, num_lambdas)
+        lambda_reg_list = np.logspace(-5, 1, num_lambdas)
         return np.array(lambda_reg_list)
 
 # Question 6.6
@@ -84,32 +84,39 @@ def compareprinter(weightsdictionary):
     for key in sorted(weightsdictionary)[:5]:
         print key, weightsdictionary[key]
 
-def runner(X_train, y_train, X_test, y_test, gram_size, num_lambdas, num_epochs, algo):
+def runner(X_train, y_train, X_test, y_test, gram_size, num_lambdas, num_epochs, algo, question):
     lambda_reg_list = lambdaListBuider(num_lambdas)
 
     # takes the data, algo type, and the parameters of the algo
     train_scores, w_list = testLambdaValues(X_train, y_train, lambda_reg_list, num_epochs, algo)
 
-    # Questin 6.5 - calculate the percent erro when predicting y using sign((w.T)x)
-    score_list = calcError(w_list, X_train, y_train)
-    for i in range(len(score_list)):
-        print "Lambda Value - ", lambda_reg_list[i], " the percent error was", score_list[i]
+    if question == "Question 8.1":
+        # Questin 6.5 - calculate the percent erro when predicting y using sign((w.T)x)
+        score_list = calcError(w_list, X_train, y_train)
+        for i in range(len(score_list)):
+            print "Lambda Value - ", lambda_reg_list[i], " the percent error was", score_list[i]
 
-    # Question 6.6 - searching for the best Lambda regularization value
-    bestLambda, bestw, min_Loss = getbestLambda_Thetas(score_list, lambda_reg_list, w_list)
+        # Question 6.6 - searching for the best Lambda regularization value
+        bestLambda, bestw, min_Loss = getbestLambda_Thetas(score_list, lambda_reg_list, w_list)
 
-    # plot the scores of the decision fucntion against the corresponding lamdba values
-    plotlambdascores(score_list, lambda_reg_list, 'N_gram_Size - '+str(gram_size)+' - '+algo)
+        # plot the scores of the decision fucntion against the corresponding lamdba values
+        plotlambdascores(score_list, lambda_reg_list, 'N_gram_Size - '+str(gram_size)+' - '+algo)
 
-    # Questin 7.1
-    misclassifiedList, misclassifiedList2 = classificationAnalysis(X_test, y_test, bestw)
-    sorted_list = sorted(misclassifiedList2, key=lambda x: x[3], reverse=True)
-    sorted_list2 = sorted(misclassifiedList, key=lambda x: x[3], reverse=True)
-    print "\n ####### misclassified #1\n", sorted_list[:10]
-    print "\n ####### misclassified #2\n", sorted_list2[:10]
+        # Questin 7.1
+        misclassifiedList, misclassifiedList2 = classificationAnalysis(X_test, y_test, bestw)
+        sorted_list = sorted(misclassifiedList2, key=lambda x: x[3], reverse=True)
+        sorted_list2 = sorted(misclassifiedList, key=lambda x: x[3], reverse=True)
+        print "\n ####### misclassified in example #1\n"
+        for i in sorted_list[:10]:
+            print i
+        print "\n ####### misclassified in example #2\n"
+        for i in sorted_list[:10]:
+            print i
 
-    # Question 6.4
-    return w_list
+        return min_Loss
+
+    elif question == "Question 6.4":
+        return w_list
 
 # Question 6.4
 def comparePegasosVersions(gram_size):
@@ -117,8 +124,8 @@ def comparePegasosVersions(gram_size):
     X_train, y_train, X_test, y_test = countTrainAndTest(gram_size)
 
     # execute the two versions of the Pegasos Algorithm
-    w = runner(X_train, y_train, X_test, y_test, gram_size, 1, 2, 'pegasos')
-    wv2 = runner(X_train, y_train, X_test, y_test, gram_size, 1, 2, 'pegasosv2')
+    w = runner(X_train, y_train, X_test, y_test, gram_size, 1, 2, 'pegasos', "Question 6.4")
+    wv2 = runner(X_train, y_train, X_test, y_test, gram_size, 1, 2, 'pegasosv2', "Question 6.4")
 
     print "\n ####### Top 5 Pegasos keys and weight values #1\n"
     compareprinter(w[0])
@@ -126,17 +133,34 @@ def comparePegasosVersions(gram_size):
     compareprinter(wv2[0])
 
 # Question 8.1
-def compareUniGramAndBiGram(gram_size, num_lambdas, num_epochs, algo):
+def compareUniGramAndBiGram(gram_size, num_lambdas, num_epochs, algo, question):
     X_train, y_train, X_test, y_test = countTrainAndTest(gram_size)
-    runner(X_train, y_train, X_test, y_test, gram_size, num_lambdas, num_epochs, algo)
+    min_Loss = runner(X_train, y_train, X_test, y_test, gram_size, num_lambdas, num_epochs, algo, question)
+    return min_Loss
 
 def main():
     # Question 6.4
-    # comparePegasosVersions(1)
+    print "\n ######### Question 6.4 ############# \n"
+    comparePegasosVersions(1)
 
     # Question 8.1
-    compareUniGramAndBiGram(1, 10, 2, 'pegasosv2')
-    # compareUniGramAndBiGram(2, 10, 2, 'pegasosv2')
+    print "\n ######### Question 8.1 ############# \n"
+    print "\n ######### Question 8.1 UNIGRAMS ############# \n"
+    min_Loss = compareUniGramAndBiGram(1, 10, 2, 'pegasosv2', "Question 8.1")
+    print "\n ######### Question 8.1 BIGRAMS ############# \n"
+    min_Loss_biGrams = compareUniGramAndBiGram(2, 10, 2, 'pegasosv2', "Question 8.1")
+
+    # Question 8.1 - continued
+    print "\n ######### Question 8.1 - continued ############# \n"
+    print "min loss -", min_Loss
+    print "min_Loss_biGrams -", min_Loss_biGrams
+    p = 1.0-(min_Loss_biGrams/min_Loss)
+    print "p -", p
+    standError = np.sqrt(p*(1-p)/1500)
+    print "standError -", standError
+    print p - (1.64*standError) - (0.5/1500)
+    print p + (1.64*standError) + (0.5/1500)
+
 
 if __name__ == "__main__":
     main()
